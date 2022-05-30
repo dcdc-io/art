@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="./mustard/tree-sitter.js"></script>
+    <script type="module">
+      import * as art from "./build/debug.js";
+
+      const Parser = window.TreeSitter;
+      Parser.init().then(async () => {
+        const parser = new Parser();
+        const mustard = await Parser.Language.load(
+          "./mustard/tree-sitter-mustard.wasm"
+        );
+        parser.setLanguage(mustard);
+
+        const engine = art.newEngine();
+        const scope = art.newTopLevelScope(engine);
+
+        document.body.innerText = art.add(1, 2);
+
+        const tree = parser.parse(`
+          let foo = 1
+          let bar = 2
+          let abc = foo + bar
+
+          {
+            abc
+          }
+        `);
+
+        const pe = (x, y) => {
+          if (x.length != y.length) {
+            return false;
+          }
+          for (let i = 0; i < x.length; i++) {
+            if (x[i] != y[i]) {
+              return false;
+            }
+          }
+          return true;
+        };
+        const c = tree.rootNode;
+        const walk = (p, c, s) => {
+         // console.log(p, c, s);
+          if (pe(p, [])) {
+            s = art.newTopLevelScope(engine);
+          }
+
+          if (
+            pe([...p, c.type], [
+              "document",
+              "statement",
+              "declaration_statement",
+              "let_declaration",
+            ])
+          ) {
+            const name = c.childForFieldName("ident").text
+            const expr = c.childForFieldName("value").text
+            console.log(name, expr)
+          }
+
+          if (c.children) {
+            c.children.filter(n => n.isNamed()).forEach((x) => walk([...p, c.type], x, s));
+          }
+        };
+
+        walk([], c);
+        const e = art.evaluate(scope, tree);
+      });
+    </script>
+  </head>
+  <body></body>
+</html>

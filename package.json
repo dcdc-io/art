@@ -1,0 +1,33 @@
+{
+  "name": "art",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node tests",
+    "asbuild:debug": "asc assembly/index.ts --target debug --exportRuntime",
+    "asbuild:release": "asc assembly/index.ts --target release --exportRuntime",
+    "asbuild": "npm run asbuild:debug && npm run asbuild:release",
+    "start": "npx serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dcdc-io/art.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dcdc-io/art/issues"
+  },
+  "homepage": "https://github.com/dcdc-io/art#readme",
+  "devDependencies": {
+    "assemblyscript": "^0.20.7"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./build/release.js",
+      "types": "./build/release.d.ts"
+    }
+  }
+}
